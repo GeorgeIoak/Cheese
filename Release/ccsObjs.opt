@@ -1,0 +1,1 @@
+"./MyADC14.obj" "./MyADC14_v2.obj" "./PhotoDiode_Sensor.obj" "./msp432_startup_ccs.obj" "./msp432p401_adc14_01.obj" "../msp432p401r.cmd" -l"libc.a" 

@@ -1,0 +1,266 @@
+******************************************************************************
+                  TI ARM Linker PC v5.2.6                      
+******************************************************************************
+>> Linked Fri Jan 22 17:53:42 2016
+
+OUTPUT FILE NAME:   <Cheese.out>
+ENTRY POINT SYMBOL: "_c_int00"  address: 000009d9
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  MAIN                  00000000   00040000  00000b58  0003f4a8  R  X
+  INFO                  00200000   00004000  00000000  00004000  R  X
+  SRAM_CODE             01000000   00010000  00000000  00010000  RW X
+  SRAM_DATA             20000000   00010000  00000268  0000fd98  RW  
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+00000000    00000000    00000b58   00000b58    r-x
+  00000000    00000000    00000140   00000140    r-- .intvecs
+  00000140    00000140    000009e0   000009e0    r-x .text
+  00000b20    00000b20    00000038   00000038    r-- .cinit
+20000000    20000000    00000068   00000000    rw-
+  20000000    20000000    00000048   00000000    rw- .bss
+  20000048    20000048    00000020   00000000    rw- .data
+2000fe00    2000fe00    00000200   00000000    rw-
+  2000fe00    2000fe00    00000200   00000000    rw- .stack
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.intvecs   0    00000000    00000140     
+                  00000000    00000140     msp432_startup_ccs.obj (.intvecs:retain)
+
+.text      0    00000140    000009e0     
+                  00000140    0000057c     MyADC14_v2.obj (.text)
+                  000006bc    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.obj (.text)
+                  000006c0    00000128     PhotoDiode_Sensor.obj (.text)
+                  000007e8    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.obj (.text)
+                  00000884    0000007a                                   : memset_t2.obj (.text)
+                  000008fe    00000002     --HOLE-- [fill = 0]
+                  00000900    0000006c                                   : autoinit.obj (.text)
+                  0000096c    0000006a                                   : copy_decompress_rle.obj (.text)
+                  000009d6    00000002     --HOLE-- [fill = 0]
+                  000009d8    00000050                                   : boot.obj (.text)
+                  00000a28    0000004c                                   : cpy_tbl.obj (.text)
+                  00000a74    00000044                                   : exit.obj (.text)
+                  00000ab8    0000001a     msp432_startup_ccs.obj (.text)
+                  00000ad2    00000002     --HOLE-- [fill = 0]
+                  00000ad4    00000018     rtsv7M4_T_le_v4SPD16_eabi.lib : args_main.obj (.text)
+                  00000aec    00000014                                   : _lock.obj (.text)
+                  00000b00    0000000e                                   : copy_decompress_none.obj (.text:decompress:none)
+                  00000b0e    0000000c                                   : copy_zero_init.obj (.text:decompress:ZI)
+                  00000b1a    00000006                                   : copy_decompress_rle.obj (.text:decompress:rle24)
+
+.cinit     0    00000b20    00000038     
+                  00000b20    00000012     (.cinit..data.load) [load image, compression = rle]
+                  00000b32    00000002     --HOLE-- [fill = 0]
+                  00000b34    0000000c     (__TI_handler_table)
+                  00000b40    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  00000b48    00000010     (__TI_cinit_table)
+
+.init_array 
+*          0    00000000    00000000     UNINITIALIZED
+
+.bss       0    20000000    00000048     UNINITIALIZED
+                  20000000    00000020     (.common:samples)
+                  20000020    00000004     (.common:diode_sensor_result_ready)
+                  20000024    00000004     (.common:displayMode)
+                  20000028    00000004     (.common:max)
+                  2000002c    00000004     (.common:millivolts)
+                  20000030    00000004     (.common:min)
+                  20000034    00000004     (.common:reading)
+                  20000038    00000004     (.common:readingNo)
+                  2000003c    00000004     (.common:sleeping)
+                  20000040    00000004     (.common:val)
+                  20000044    00000004     (.common:volts)
+
+.TI.noinit 
+*          0    20000000    00000000     UNINITIALIZED
+
+.data      0    20000048    00000020     UNINITIALIZED
+                  20000048    0000000a     MyADC14_v2.obj (.data)
+                  20000052    00000002     --HOLE--
+                  20000054    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.data)
+                  2000005c    00000008                                   : exit.obj (.data)
+                  20000064    00000004                                   : stkdepth_vars.obj (.data)
+
+.TI.persistent 
+*          0    20000048    00000000     UNINITIALIZED
+
+.stack     0    2000fe00    00000200     UNINITIALIZED
+                  2000fe00    00000200     --HOLE--
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 00000b48 records: 2, size/record: 8, table size: 16
+	.data: load addr=00000b20, load size=00000012 bytes, run addr=20000048, run size=00000020 bytes, compression=rle
+	.bss: load addr=00000b40, load size=00000008 bytes, run addr=20000000, run size=00000048 bytes, compression=zero_init
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 00000b34 records: 3, size/record: 4, table size: 12
+	index: 0, handler: __TI_decompress_rle24
+	index: 1, handler: __TI_decompress_none
+	index: 2, handler: __TI_zero_init
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                     
+-------   ----                     
+000007d9  ADC14IsrHandler          
+00000a75  C$$EXIT                  
+00000669  Port1Handler             
+UNDEFED   SHT$$INIT_ARRAY$$Base    
+UNDEFED   SHT$$INIT_ARRAY$$Limit   
+4000480c  WDTCTL_SYM               
+000005e9  WdtIsrHandler            
+20010000  __STACK_END              
+00000200  __STACK_SIZE             
+00000b48  __TI_CINIT_Base          
+00000b58  __TI_CINIT_Limit         
+00000b34  __TI_Handler_Table_Base  
+00000b40  __TI_Handler_Table_Limit 
+00000901  __TI_auto_init           
+2000005c  __TI_cleanup_ptr         
+00000b01  __TI_decompress_none     
+00000b1b  __TI_decompress_rle24    
+20000060  __TI_dtors_ptr           
+00000000  __TI_static_base__       
+00000b0f  __TI_zero_init           
+00000885  __aeabi_memclr           
+00000885  __aeabi_memclr4          
+00000885  __aeabi_memclr8          
+000007e9  __aeabi_memcpy           
+000007e9  __aeabi_memcpy4          
+000007e9  __aeabi_memcpy8          
+00000887  __aeabi_memset           
+00000887  __aeabi_memset4          
+00000887  __aeabi_memset8          
+ffffffff  __binit__                
+ffffffff  __c_args__               
+2000fe00  __stack                  
+00000ad5  _args_main               
+000009d9  _c_int00                 
+20000054  _lock                    
+00000afb  _nop                     
+00000af3  _register_lock           
+00000aed  _register_unlock         
+000006bd  _system_pre_init         
+20000058  _unlock                  
+00000a79  abort                    
+ffffffff  binit                    
+00000a29  copy_in                  
+000006c9  diode_sensor_init        
+000007b9  diode_sensor_read        
+00000781  diode_sensor_read_result 
+20000020  diode_sensor_result_ready
+20000024  displayMode              
+00000a81  exit                     
+20000050  idleCounter              
+00000000  interruptVectors         
+00000149  main                     
+20000064  main_func_sp             
+20000028  max                      
+20000051  measurementCounter       
+000007e9  memcpy                   
+0000088d  memset                   
+2000002c  millivolts               
+20000030  min                      
+20000034  reading                  
+20000038  readingNo                
+20000048  sample_index             
+20000000  samples                  
+2000003c  sleeping                 
+00000591  updateDisplay            
+20000040  val                      
+2000004c  voltage_ave              
+20000044  volts                    
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                     
+-------   ----                     
+00000000  __TI_static_base__       
+00000000  interruptVectors         
+00000149  main                     
+00000200  __STACK_SIZE             
+00000591  updateDisplay            
+000005e9  WdtIsrHandler            
+00000669  Port1Handler             
+000006bd  _system_pre_init         
+000006c9  diode_sensor_init        
+00000781  diode_sensor_read_result 
+000007b9  diode_sensor_read        
+000007d9  ADC14IsrHandler          
+000007e9  __aeabi_memcpy           
+000007e9  __aeabi_memcpy4          
+000007e9  __aeabi_memcpy8          
+000007e9  memcpy                   
+00000885  __aeabi_memclr           
+00000885  __aeabi_memclr4          
+00000885  __aeabi_memclr8          
+00000887  __aeabi_memset           
+00000887  __aeabi_memset4          
+00000887  __aeabi_memset8          
+0000088d  memset                   
+00000901  __TI_auto_init           
+000009d9  _c_int00                 
+00000a29  copy_in                  
+00000a75  C$$EXIT                  
+00000a79  abort                    
+00000a81  exit                     
+00000ad5  _args_main               
+00000aed  _register_unlock         
+00000af3  _register_lock           
+00000afb  _nop                     
+00000b01  __TI_decompress_none     
+00000b0f  __TI_zero_init           
+00000b1b  __TI_decompress_rle24    
+00000b34  __TI_Handler_Table_Base  
+00000b40  __TI_Handler_Table_Limit 
+00000b48  __TI_CINIT_Base          
+00000b58  __TI_CINIT_Limit         
+20000000  samples                  
+20000020  diode_sensor_result_ready
+20000024  displayMode              
+20000028  max                      
+2000002c  millivolts               
+20000030  min                      
+20000034  reading                  
+20000038  readingNo                
+2000003c  sleeping                 
+20000040  val                      
+20000044  volts                    
+20000048  sample_index             
+2000004c  voltage_ave              
+20000050  idleCounter              
+20000051  measurementCounter       
+20000054  _lock                    
+20000058  _unlock                  
+2000005c  __TI_cleanup_ptr         
+20000060  __TI_dtors_ptr           
+20000064  main_func_sp             
+2000fe00  __stack                  
+20010000  __STACK_END              
+4000480c  WDTCTL_SYM               
+ffffffff  __binit__                
+ffffffff  __c_args__               
+ffffffff  binit                    
+UNDEFED   SHT$$INIT_ARRAY$$Base    
+UNDEFED   SHT$$INIT_ARRAY$$Limit   
+
+[68 symbols]
