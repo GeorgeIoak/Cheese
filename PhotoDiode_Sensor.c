@@ -20,7 +20,8 @@ void diode_sensor_init(void) {
   ADC14CTL1 = ADC14RES_2;                   		// Use sampling timer, 12-bit conversion results
 
   //ADC14MCTL0 |= ADC14INCH_1;                	// A1 ADC input select; Vref=AVCC
-  ADC14MCTL0 =ADC14VRSEL_1 + ADC14INCH_1;      	// A1 ADC input select; Vref=1.2V
+  //ADC14MCTL0 =ADC14VRSEL_1 + ADC14INCH_1;      	// A1 ADC input select; Vref=1.2V
+	ADC14MCTL0 |= ADC14VRSEL_1 | ADC14INCH_1;      	// A1 ADC input select; Vref=1.2V
   ADC14IER0 |= ADC14IE0;                    		// Enable ADC conv complete interrupt
 
   diode_sensor_result_ready = 0;
