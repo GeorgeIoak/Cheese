@@ -13,13 +13,13 @@ int sample_index=0;
 int voltage_ave=0;
 int millivolts;
 int volts;
-unsigned int val;
+unsigned int val, i;
 unsigned int min, max;
 unsigned int samples[NUM_SAMPLES];
 volatile unsigned int displayMode;
 unsigned int readingNo;
-unsigned char idleCounter = 0;
-unsigned char measurementCounter = 0;
+unsigned int idleCounter = 0;
+unsigned int measurementCounter = 0;
 unsigned int sleeping, reading;
 #define DISPLAY_MODE_CURRENT            0
 #define DISPLAY_MODE_MIN                1
@@ -30,19 +30,18 @@ void updateDisplay(void);
 
 
 int main(void) {
-  volatile int i;
   max = 0;
   min = UINT16_MAX;
   sleeping = 0;
   reading = 0;
+  displayMode = DISPLAY_MODE_CURRENT;
 
   diode_sensor_init();
 
-  WDTCTL = WDTPW | WDTHOLD;                 		// Stop WDT
+  WDTCTL = WDTPW | WDTHOLD;                 	// Stop WDT
 
   // GPIO Setup
   /* Configuring P1.0 as output and P1.1 (switch) as input with pull-up resistor*/
-  /* Rest of pins are configured as output low */
   P1DIR = ~(uint8_t) BIT1;
   P1OUT = BIT1;
   P1REN = BIT1;                                 // Enable pull-up resistor (P1.1 output high)
@@ -51,20 +50,23 @@ int main(void) {
   P1IFG = 0;                                    // Clear all P1 interrupt flags
   P1IE = BIT1;                                  // Enable interrupt for P1.1
   P1IES = BIT1;                                 // Interrupt on high-to-low transition
-
-  // Enable Port 1 interrupt on the NVIC
-  NVIC_ISER1 = 1 << ((INT_PORT1 - 16) & 31);
-  NVIC_ISER0 = 1 << ((INT_WDT_A - 16) & 31);
-
-  P1OUT &= ~BIT0;                           		// Clear LED to start
-  P1DIR |= BIT0;                            		// Set P1.0/LED to output
-  P5SEL1 |= BIT4;                           		// Configure P5.4 for ADC
+	
+  P1OUT &= ~BIT0;                           	// Clear LED to start
+	
+  P5SEL1 |= BIT4;                           	// Configure P5.4 for ADC
   P5SEL0 |= BIT4;
 
   P4DIR |= BIT2;                                // P4.2 output
   P4SEL0 |= BIT2;                               // P4.2 option select
   
   PJSEL0 |= BIT0 | BIT1;                        // set LFXT pin as second function
+
+  // Enable Port 1 interrupt on the NVIC
+  NVIC_ISER1 = 1 << ((INT_PORT1 - 16) & 31);
+  NVIC_ISER0 = 1 << ((INT_WDT_A - 16) & 31);
+  NVIC_ISER0 |= 1 << ((INT_ADC14 - 16) & 31);    // Enable ADC interrupt in NVIC module
+
+
   
   CSKEY = 0x695A;                               // Unlock CS module for register access
   CSCTL2 |= LFXT_EN;                            // LFXT on
@@ -74,18 +76,18 @@ int main(void) {
       // Clear XT2,XT1,DCO fault flags
      CSCLRIFG |= CLR_DCORIFG | CLR_HFXTIFG | CLR_LFXTIFG;
      SYSCTL_NMI_CTLSTAT &= ~ SYSCTL_NMI_CTLSTAT_CS_SRC;
-  }
-  while (SYSCTL_NMI_CTLSTAT & SYSCTL_NMI_CTLSTAT_CS_FLG); // Test oscillator fault flag
+  } while (SYSCTL_NMI_CTLSTAT & SYSCTL_NMI_CTLSTAT_CS_FLG); // Test oscillator fault flag
   CSCTL1 = CSCTL1 & ~(SELS_M | DIVS_M) | SELA_0; // Select ACLK as LFXTCLK
   CSKEY = 0;                                    // Lock CS module from unintended accesses
 
+  SCB_SCR &= ~SCB_SCR_SLEEPONEXIT;           		// Wake up on exit from ISR
   __enable_interrupt();
 
   readingNo = 0;
   reading = 1;
 
   diode_sensor_read();
-  WDTCTL = WDTPW | WDTSSEL__ACLK | WDTTMSEL | WDTCNTCL | WDTIS_4;  // WDT 250ms, ACLK, interval timer
+  WDTCTL = WDTPW | WDTSSEL__ACLK | WDTTMSEL | WDTCNTCL | WDTIS_5;  // WDT 250ms, ACLK, interval timer
   while (1) {
       if (diode_sensor_read_result(&samples[readingNo])) {
         // We got a result from the ADC, deal with it
@@ -118,30 +120,30 @@ int main(void) {
           }
           P1OUT ^= BIT0;  // Toggle LED0 after every average
           sample_index = 0;
-            //  reset reading state and update display
-            ADC14CTL0 &= ~(REFON|ADC14ON);
-            reading = 0;
-            measurementCounter = 0;
-            //curVal = 0;
-            updateDisplay();
+					//  reset reading state and update display
+					ADC14CTL0 &= ~(REFON|ADC14ON);
+					reading = 0;
+					measurementCounter = 0;
+					//curVal = 0;
+					updateDisplay();
         } else {
           // We need more readings for the current sensor
-          diode_sensor_read();
+						diode_sensor_read();
         }
      }  else {
-        // No ADC result. We are thus awoken by (not mutual exclusive).
-        // a) the user pressing a button.
-        // b) idleCounter reached the defined value.
-        // c) measurementCounter reached the defined value.
-        //
-        // a) and b) are both handled in updateDisplay
-        updateDisplay();
+					// No ADC result. We are thus awoken by (not mutual exclusive).
+					// a) the user pressing a button.
+					// b) idleCounter reached the defined value.
+					// c) measurementCounter reached the defined value.
+					//
+					// a) and b) are both handled in updateDisplay
+					updateDisplay();
 
-        if( (measurementCounter >= MEASUREMENT_TIME) && !reading ) {
-          // Deal with c) here:
-          reading = 1;
-          diode_sensor_read();
-        }
+					if( (measurementCounter >= MEASUREMENT_TIME) && !reading ) {
+						// Deal with c) here:
+						reading = 1;
+						diode_sensor_read();
+					}
       }
       if( !reading && sleeping) {
         /* Entering LPM3 with GPIO interrupt */
@@ -159,14 +161,14 @@ int main(void) {
 }
 
 void updateDisplay(void) {
-  unsigned int i;
+  //unsigned int i;
 
   if( sleeping && displayMode == DISPLAY_MODE_SLEEP) {
     // We are sleeping, and noone is waking us
     return;
   } else if( sleeping ) {
     // Time to wake up:
-    sleeping = false;
+    sleeping = 0;
     /*P1SEL |= PWM_PIN;
     TACTL |= MC_1;
     lcd_backlight(true);
@@ -174,7 +176,7 @@ void updateDisplay(void) {
     lcd_clear();*/
   } else if( displayMode == DISPLAY_MODE_SLEEP) {
     // Time to sleep:
-    sleeping = true;
+    sleeping = 1;
     /*P1SEL &= ~PWM_PIN;
     P1OUT &= ~PWM_PIN;
     TACTL &= ~(MC0|MC1);
@@ -191,6 +193,8 @@ void WdtIsrHandler(void)
     if( !sleeping) {
     idleCounter++;
   }
+	
+	P1OUT ^= BIT0;                          // Toggle P1.0 LED for tersting
 
   if( !reading ) {
     measurementCounter++;
